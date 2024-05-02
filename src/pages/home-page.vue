@@ -39,11 +39,13 @@ const labRef = ref<lab[]>(labs);
 const subjects = ref<lab[]>([]);
 
 const fetchSubjects = async () => {
-    const { data: subjects, error } = await supabase.from('subjects').select('*');
+    const { data: subjects, error } = await supabase
+        .from('subjects')
+        .select('*');
     if (error) {
         console.error('Error fetching labs:', error.message);
     } else {
-        console.log(subjects)
+        console.log(`subjects ${subjects}`);
         labRef.value = subjects;
     }
 };
@@ -51,7 +53,6 @@ const fetchSubjects = async () => {
 onMounted(() => {
     fetchSubjects();
 });
-
 </script>
 
 <template>
@@ -106,15 +107,30 @@ onMounted(() => {
             <form>
                 <div class="mb-3">
                     <label for="className" class="form-label">Class Name</label>
-                    <input type="text" class="form-control" id="className" placeholder="Enter class name">
+                    <input
+                        type="text"
+                        class="form-control"
+                        id="className"
+                        placeholder="Enter class name"
+                    />
                 </div>
                 <div class="mb-3">
                     <label for="classTime" class="form-label">Time</label>
-                    <input type="text" class="form-control" id="classTime" placeholder="Enter class time">
+                    <input
+                        type="text"
+                        class="form-control"
+                        id="classTime"
+                        placeholder="Enter class time"
+                    />
                 </div>
                 <div class="mb-3">
                     <label for="classRoom" class="form-label">Room</label>
-                    <input type="text" class="form-control" id="classRoom" placeholder="Enter room number">
+                    <input
+                        type="text"
+                        class="form-control"
+                        id="classRoom"
+                        placeholder="Enter room number"
+                    />
                 </div>
                 <button type="submit" class="btn btn-primary">Add Class</button>
             </form>

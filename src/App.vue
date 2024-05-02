@@ -5,10 +5,9 @@ import HeaderNav from '@components/nav/header-nav.vue';
 <template>
     <header-nav />
 
-    <p>Current route: {{ $route.fullPath }}</p>
-
     <main>
         <router-view />
+        <p class="p-4">Current route: {{ $route.fullPath }}</p>
     </main>
 </template>
 

@@ -1,11 +1,19 @@
-<script lang="ts" setup></script>
+<script lang="ts" setup>
+import { useRouter } from 'vue-router';
+
+const router = useRouter();
+
+const navigateToLogin = () => {
+    router.push('/login');
+};
+</script>
 
 <template>
     <header class="container-fluid">
         <nav class="navbar navbar-expand-lg">
             <div class="container-fluid">
                 <!-- Logo and title -->
-                <a class="navbar-brand" href="#">
+                <router-link to="/" class="navbar-brand">
                     <img
                         src=""
                         alt=""
@@ -14,7 +22,7 @@
                         class="d-inline-block align-text-top"
                     />
                     Lab Rat
-                </a>
+                </router-link>
 
                 <!-- Toggler button for mobile view -->
                 <button
@@ -36,12 +44,16 @@
                 >
                     <ul class="navbar-nav">
                         <li class="nav-item">
-                            <a
+                            <router-link
+                                to="/"
                                 class="nav-link active"
                                 aria-current="page"
-                                href="#"
-                                >Teachers</a
                             >
+                                Home
+                            </router-link>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#">Teachers</a>
                         </li>
                         <li class="nav-item">
                             <a class="nav-link" href="#">Students</a>
@@ -52,7 +64,13 @@
 
             <!-- Login/Signup Button on the right -->
             <div class="d-flex">
-                <button class="btn" type="button">Login</button>
+                <button
+                    class="btn btn-primary"
+                    type="button"
+                    @click="navigateToLogin"
+                >
+                    Login
+                </button>
             </div>
         </nav>
     </header>
