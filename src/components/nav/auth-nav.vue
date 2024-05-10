@@ -1,24 +1,23 @@
 <script lang="ts" setup>
-import { onMounted, ref } from 'vue';
+import { storeToRefs } from 'pinia';
 
-const isAuthenticated = ref(false);
+import { useAccountStore } from '@data/account.ts';
 
-onMounted(() => {
-    isAuthenticated.value = false;
-})
+const store = useAccountStore();
+
+const { isAuthenticated } = storeToRefs(store);
 </script>
 
 <template>
-    <!-- Login/Signup Button on the right -->
     <div class="d-flex">
-        <router-link v-if="isAuthenticated" to="/login" class="btn btn-primary">
-            Login
-        </router-link>
-        <div v-else>
+        <div v-if="isAuthenticated">
             <router-link to="/account">
                 Profile
             </router-link>
         </div>
+        <router-link v-else to="/login" class="btn btn-primary">
+            Login
+        </router-link>
     </div>
 </template>
 

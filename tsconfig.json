@@ -19,16 +19,18 @@
         "noUnusedLocals": true,
         "noUnusedParameters": true,
         "noFallthroughCasesInSwitch": true,
+        "baseUrl": "src",
 
         "paths": {
-            "@/*": ["./src/*"],
-            "@pages/*": ["./src/pages/*"],
-            "@components/*": ["./src/components/*"],
-            "@assets/*": ["./src/assets/*"],
-            "@images/*": ["./src/assets/images/*"]
+            "@/*": ["*"],
+            "@pages/*": ["pages/*"],
+            "@components/*": ["components/*"],
+            "@data/*": ["data/*"],
+            "@assets/*": ["assets/*"],
+            "@images/*": ["assets/images/*"]
         }
     },
-    "include": ["src/**/*.ts", "src/**/*.tsx", "src/**/*.vue"],
+    "include": ["src/**/*.ts", "src/**/*.tsx", "src/**/*.vue", "src/**/*.ext"],
     "exclude": ["node_modules", "dist", "build", "public"],
     "references": [{ "path": "./tsconfig.node.json" }]
 }

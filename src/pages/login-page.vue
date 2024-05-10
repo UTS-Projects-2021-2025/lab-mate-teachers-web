@@ -1,6 +1,10 @@
 <script setup lang="ts">
 import { ref } from 'vue';
+import { useRouter } from 'vue-router';
+
 import { supabase } from '@/supabase-client';
+
+const router = useRouter();
 
 const loading = ref(false);
 const err = ref<string | null>(null);
@@ -20,6 +24,7 @@ const login = async () => {
     }
 
     loading.value = false;
+    router.push('/check-email');
 };
 </script>
 
@@ -32,22 +37,11 @@ const login = async () => {
                         <h5 class="card-title text-center mb-4">Login</h5>
                         <form @submit.prevent="login">
                             <div class="mb-2">
-                                <label for="email" class="form-label"
-                                    >Email</label
-                                >
-                                <input
-                                    v-model="email"
-                                    type="email"
-                                    class="form-control"
-                                    id="email"
-                                    placeholder="Enter your email"
-                                />
+                                <label for="email" class="form-label">Email</label>
+                                <input v-model="email" type="email" class="form-control" id="email"
+                                    placeholder="Enter your email" />
                             </div>
-                            <button
-                                type="submit"
-                                class="btn btn-primary"
-                                :disabled="loading"
-                            >
+                            <button type="submit" class="btn btn-primary" :disabled="loading">
                                 Login
                             </button>
                             <p v-if="err" class="text-danger mt-2">{{ err }}</p>

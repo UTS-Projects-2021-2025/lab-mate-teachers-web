@@ -1,5 +1,14 @@
 <script lang="ts" setup>
+import { onMounted } from 'vue';
+
+import { useAccountStore } from '@data/account.ts';
 import HeaderNav from '@components/nav/header-nav.vue';
+
+const { loadSession } = useAccountStore();
+
+onMounted(() => {
+    loadSession();
+})
 </script>
 
 <template>
@@ -7,7 +16,6 @@ import HeaderNav from '@components/nav/header-nav.vue';
 
     <main>
         <router-view />
-        <p class="p-4">Current route: {{ $route.fullPath }}</p>
     </main>
 </template>
 
@@ -18,9 +26,11 @@ import HeaderNav from '@components/nav/header-nav.vue';
     will-change: filter;
     transition: filter 300ms;
 }
+
 .logo:hover {
     filter: drop-shadow(0 0 2em #646cffaa);
 }
+
 .logo.vue:hover {
     filter: drop-shadow(0 0 2em #42b883aa);
 }
