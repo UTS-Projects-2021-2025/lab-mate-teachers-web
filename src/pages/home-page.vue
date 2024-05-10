@@ -36,6 +36,10 @@ const labs: lab[] = [
 ];
 const labRef = ref<lab[]>(labs);
 
+const className = ref<string>('');
+const isLoading = ref<boolean>(false);
+const error = ref<string | null>(null);
+
 const subjects = ref<lab[]>([]);
 
 const fetchSubjects = async () => {
@@ -63,21 +67,26 @@ onMounted(() => {
         <div class="container-fluid mb-4">
             <h4>Create Classroom</h4>
 
-            <form>
-                <div class="mb-3">
-                    <label for="className" class="form-label">Class Name</label>
-                    <input type="text" class="form-control" id="className" placeholder="Enter class name" />
+            <div class="row justify-content-center">
+                <div class="col-md-6">
+                    <div class="card">
+                        <div class="card-body">
+                            <form @submit.prevent="">
+                                <div class="mb-2">
+                                    <label for="className" class="form-label">Name</label>
+                                    <input type="text" class="form-control" id="className" placeholder="Enter class name."
+                                        v-model="className" />
+                                </div>
+
+                                <button type="submit" class="btn btn-primary" :disabled="isLoading">
+                                    Create
+                                </button>
+                                <p v-if="error" class="text-danger mt-2">{{ error }}</p>
+                            </form>
+                        </div>
+                    </div>
                 </div>
-                <div class="mb-3">
-                    <label for="classTime" class="form-label">Time</label>
-                    <input type="text" class="form-control" id="classTime" placeholder="Enter class time" />
-                </div>
-                <div class="mb-3">
-                    <label for="classRoom" class="form-label">Room</label>
-                    <input type="text" class="form-control" id="classRoom" placeholder="Enter room number" />
-                </div>
-                <button type="submit" class="btn btn-primary">Add Class</button>
-            </form>
+            </div>
         </div>
 
         <div class="container-fluid mb-4">
