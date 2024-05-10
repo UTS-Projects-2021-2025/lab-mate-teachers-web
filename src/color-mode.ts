@@ -7,8 +7,9 @@
 (() => {
     'use strict';
 
-    const getStoredTheme = () => localStorage.getItem('theme');
-    const setStoredTheme = (theme) => localStorage.setItem('theme', theme);
+    const getStoredTheme = () => localStorage.getItem('labmate:theme');
+    const setStoredTheme = (theme: string) =>
+        localStorage.setItem('labmate:theme', theme);
 
     const getPreferredTheme = () => {
         const storedTheme = getStoredTheme();
@@ -21,7 +22,7 @@
             : 'light';
     };
 
-    const setTheme = (theme) => {
+    const setTheme = (theme: string) => {
         if (theme === 'auto') {
             document.documentElement.setAttribute(
                 'data-bs-theme',
@@ -36,8 +37,9 @@
 
     setTheme(getPreferredTheme());
 
-    const showActiveTheme = (theme, focus = false) => {
-        const themeSwitcher = document.querySelector('#bd-theme');
+    const showActiveTheme = (theme: string, focus = false) => {
+        const themeSwitcher: HTMLElement | null =
+            document.querySelector('#bd-theme');
 
         if (!themeSwitcher) {
             return;
@@ -47,12 +49,12 @@
         const activeThemeIcon = document.querySelector(
             '.theme-icon-active use',
         );
-        const btnToActive = document.querySelector(
+        const btnToActive: HTMLElement | null = document.querySelector(
             `[data-bs-theme-value="${theme}"]`,
         );
-        const svgOfActiveBtn = btnToActive
-            .querySelector('svg use')
-            .getAttribute('href');
+
+        const svgOfActiveBtn =
+            btnToActive?.querySelector('svg use')?.getAttribute('href') || '';
 
         document
             .querySelectorAll('[data-bs-theme-value]')
@@ -61,10 +63,10 @@
                 element.setAttribute('aria-pressed', 'false');
             });
 
-        btnToActive.classList.add('active');
-        btnToActive.setAttribute('aria-pressed', 'true');
-        activeThemeIcon.setAttribute('href', svgOfActiveBtn);
-        const themeSwitcherLabel = `${themeSwitcherText.textContent} (${btnToActive.dataset.bsThemeValue})`;
+        btnToActive!.classList.add('active');
+        btnToActive!.setAttribute('aria-pressed', 'true');
+        activeThemeIcon!.setAttribute('href', svgOfActiveBtn);
+        const themeSwitcherLabel = `${themeSwitcherText?.textContent} (${btnToActive?.dataset.bsThemeValue})`;
         themeSwitcher.setAttribute('aria-label', themeSwitcherLabel);
 
         if (focus) {
@@ -86,7 +88,8 @@
 
         document.querySelectorAll('[data-bs-theme-value]').forEach((toggle) => {
             toggle.addEventListener('click', () => {
-                const theme = toggle.getAttribute('data-bs-theme-value');
+                const theme =
+                    toggle.getAttribute('data-bs-theme-value') || 'auto';
                 setStoredTheme(theme);
                 setTheme(theme);
                 showActiveTheme(theme, true);

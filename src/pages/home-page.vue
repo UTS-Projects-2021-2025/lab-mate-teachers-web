@@ -57,9 +57,32 @@ onMounted(() => {
 
 <template>
     <div class="container mt-4">
-        <h2>Classes</h2>
+        <h2>Classrooms</h2>
 
-        <div class="container-fluid mb-2">
+        <!-- Form to add a new class -->
+        <div class="container-fluid mb-4">
+            <h4>Create Classroom</h4>
+
+            <form>
+                <div class="mb-3">
+                    <label for="className" class="form-label">Class Name</label>
+                    <input type="text" class="form-control" id="className" placeholder="Enter class name" />
+                </div>
+                <div class="mb-3">
+                    <label for="classTime" class="form-label">Time</label>
+                    <input type="text" class="form-control" id="classTime" placeholder="Enter class time" />
+                </div>
+                <div class="mb-3">
+                    <label for="classRoom" class="form-label">Room</label>
+                    <input type="text" class="form-control" id="classRoom" placeholder="Enter room number" />
+                </div>
+                <button type="submit" class="btn btn-primary">Add Class</button>
+            </form>
+        </div>
+
+        <div class="container-fluid mb-4">
+            <h4>List Classrooms</h4>
+
             <table class="table">
                 <thead>
                     <tr>
@@ -78,62 +101,6 @@ onMounted(() => {
                     </tr>
                 </tbody>
             </table>
-        </div>
-
-        <div class="container-fluid mb-2">
-            <table class="table">
-                <thead>
-                    <tr>
-                        <th>Lab Name</th>
-                        <th>Start Time</th>
-                        <th>End Time</th>
-                        <th>Location</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr v-for="lab in labRef" :key="lab.id">
-                        <td>{{ lab.name }}</td>
-                        <td>{{ lab.startTime }}</td>
-                        <td>{{ lab.endTime }}</td>
-                        <td>{{ lab.location }}</td>
-                    </tr>
-                </tbody>
-            </table>
-        </div>
-
-        <!-- Form to add a new class -->
-        <div class="container-fluid">
-            <h4>Add New Class</h4>
-            <form>
-                <div class="mb-3">
-                    <label for="className" class="form-label">Class Name</label>
-                    <input
-                        type="text"
-                        class="form-control"
-                        id="className"
-                        placeholder="Enter class name"
-                    />
-                </div>
-                <div class="mb-3">
-                    <label for="classTime" class="form-label">Time</label>
-                    <input
-                        type="text"
-                        class="form-control"
-                        id="classTime"
-                        placeholder="Enter class time"
-                    />
-                </div>
-                <div class="mb-3">
-                    <label for="classRoom" class="form-label">Room</label>
-                    <input
-                        type="text"
-                        class="form-control"
-                        id="classRoom"
-                        placeholder="Enter room number"
-                    />
-                </div>
-                <button type="submit" class="btn btn-primary">Add Class</button>
-            </form>
         </div>
     </div>
 </template>
