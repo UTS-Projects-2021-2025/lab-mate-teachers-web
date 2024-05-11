@@ -1,66 +1,90 @@
 <script lang="ts" setup>
 import { ref, onMounted } from 'vue';
+import { storeToRefs } from 'pinia';
 
 import { supabase } from '@/supabase-client';
+import { useAccountStore } from '@data/account';
 
-type lab = {
+const authStore = useAccountStore();
+const { isAuthenticated } = storeToRefs(authStore);
+
+type classroom = {
     id: string;
+    code: string;
     name: string;
-    startTime: string;
-    endTime: string;
-    location: string;
+    updatedAt: number;
 };
-
-const labs: lab[] = [
-    {
-        id: '1',
-        name: 'Physics Lab',
-        startTime: '9:00 AM',
-        endTime: '11:00 AM',
-        location: 'Room 101',
-    },
-    {
-        id: '2',
-        name: 'Chemistry Lab',
-        startTime: '1:00 PM',
-        endTime: '3:00 PM',
-        location: 'Room 102',
-    },
-    {
-        id: '3',
-        name: 'Biology Lab',
-        startTime: '3:00 PM',
-        endTime: '5:00 PM',
-        location: 'Room 103',
-    },
-];
-const labRef = ref<lab[]>(labs);
 
 const className = ref<string>('');
 const isLoading = ref<boolean>(false);
-const error = ref<string | null>(null);
+const err = ref<string | null>(null);
 
-const subjects = ref<lab[]>([]);
+const classrooms = ref<classroom[]>([]);
 
-const fetchSubjects = async () => {
-    const { data: subjects, error } = await supabase
-        .from('subjects')
-        .select('*');
-    if (error) {
-        console.error('Error fetching labs:', error.message);
-    } else {
-        console.log(`subjects ${subjects}`);
-        labRef.value = subjects;
+const dateFormatter = (date: number) => {
+    const d = new Date(date);
+
+    return `${d.toLocaleDateString()} ${d.toLocaleTimeString()}`;
+};
+
+const createClassroom = async () => {
+    try {
+        isLoading.value = true;
+        const { error } = await supabase.from('classrooms').insert([
+            {
+                name: className.value,
+            },
+        ]);
+
+        if (error) {
+            err.value = error.message;
+            throw error;
+        } else {
+            err.value = null;
+            className.value = '';
+        }
+
+        await fetchClassrooms();
+    } catch (error: any) {
+        console.error('Error creating classroom:', error.message);
+
+        err.value = err.value || 'An error occurred while creating classroom.';
+    } finally {
+        isLoading.value = false;
+    }
+};
+
+const fetchClassrooms = async () => {
+    try {
+        const { data, error } = await supabase.from('classrooms').select('*');
+
+        if (error) {
+            throw error;
+        }
+
+        console.log(`classroom data ${data}`);
+        console.log(data);
+
+        classrooms.value = data.map((classroom) => ({
+            id: classroom.id,
+            code: classroom.code,
+            name: classroom.name,
+            updatedAt: Date.parse(classroom.updated_at),
+        }));
+    } catch (error: any) {
+        console.error('Error fetching classrooms:', error.message);
+    } finally {
+        console.log(`classrooms ${classrooms}`);
     }
 };
 
 onMounted(() => {
-    fetchSubjects();
+    fetchClassrooms();
 });
 </script>
 
 <template>
-    <div class="container mt-4">
+    <div v-if="isAuthenticated" class="container mt-4">
         <h2>Classrooms</h2>
 
         <!-- Form to add a new class -->
@@ -71,17 +95,30 @@ onMounted(() => {
                 <div class="col-md-6">
                     <div class="card">
                         <div class="card-body">
-                            <form @submit.prevent="">
+                            <form @submit.prevent="createClassroom">
                                 <div class="mb-2">
-                                    <label for="className" class="form-label">Name</label>
-                                    <input type="text" class="form-control" id="className" placeholder="Enter class name."
-                                        v-model="className" />
+                                    <label for="className" class="form-label"
+                                        >Name</label
+                                    >
+                                    <input
+                                        type="text"
+                                        class="form-control"
+                                        id="className"
+                                        placeholder="Enter class name."
+                                        v-model="className"
+                                    />
                                 </div>
 
-                                <button type="submit" class="btn btn-primary" :disabled="isLoading">
+                                <button
+                                    type="submit"
+                                    class="btn btn-primary"
+                                    :disabled="isLoading"
+                                >
                                     Create
                                 </button>
-                                <p v-if="error" class="text-danger mt-2">{{ error }}</p>
+                                <p v-if="err" class="text-danger mt-2">
+                                    {{ err }}
+                                </p>
                             </form>
                         </div>
                     </div>
@@ -96,21 +133,31 @@ onMounted(() => {
                 <thead>
                     <tr>
                         <th>Lab Name</th>
-                        <th>Start Time</th>
-                        <th>End Time</th>
-                        <th>Location</th>
+                        <th>Code</th>
+                        <th>Name</th>
+                        <th>Updated At</th>
                     </tr>
                 </thead>
                 <tbody>
-                    <tr v-for="subject in subjects" :key="subject.id">
-                        <td>{{ subject.name }}</td>
-                        <td>{{ subject.startTime }}</td>
-                        <td>{{ subject.endTime }}</td>
-                        <td>{{ subject.location }}</td>
+                    <tr v-for="classroom in classrooms" :key="classroom.id">
+                        <td>{{ classroom.name }}</td>
+                        <td>{{ classroom.code }}</td>
+                        <td>{{ classroom.name }}</td>
+                        <td>
+                            {{ dateFormatter(classroom.updatedAt) }}
+                        </td>
                     </tr>
                 </tbody>
             </table>
         </div>
+    </div>
+
+    <div class="container mt-4" v-else>
+        <h1>Welcome to Class Mate</h1>
+        <p>Please login to continue</p>
+        <router-link to="/login">
+            <button class="btn btn-primary">Login</button>
+        </router-link>
     </div>
 </template>
 
