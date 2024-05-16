@@ -1,48 +1,75 @@
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue';
-import type { RealtimeChannel } from '@supabase/supabase-js';
+import { ref, computed, defineProps } from 'vue';
+import { useRouter } from 'vue-router';
 
 import { supabase } from '@/supabase-client';
-import type { ClassroomType } from '@data/classrooms';
-import { SessionUserType, intoSessionUser } from '@data/account';
 
-type pageProps = {
+type PageProps = {
     classroomId: string;
 };
 
-const { classroomId } = defineProps<pageProps>();
+const { classroomId } = defineProps<PageProps>();
 
-const classroom = ref<ClassroomType | null>(null);
-const headerText = computed(() =>
-    classroom.value
-        ? `${classroom.value.name} with code: ${classroom.value.code}`
-        : '',
-);
+const router = useRouter();
 
-const channel = ref<RealtimeChannel | null>(null);
+const name = ref<string>('');
+const description = ref<string>('');
+const startTime = ref<string>('');
+const duration = ref<number>(0);
 
 const isLoading = ref<boolean>(false);
+const err = ref<string | null>(null);
 
-const studentList = [
-    {
-        id: '1',
-        username: 'johndoe',
-        fullName: 'John Doe',
-    },
-    {
-        id: '2',
-        username: 'janedoe',
-        fullName: 'Jane Doe',
-    },
-    {
-        id: '3',
-        username: 'johndoejr',
-        fullName: 'John Doe Jr.',
-    },
-];
+const placeholder = computed(() => (isLoading.value ? 'placeholder' : ''));
 
-const students = ref<SessionUserType[]>(studentList);
+const submit = async () => {
+    try {
+        isLoading.value = true;
+        err.value = null;
 
+        if (duration.value <= 0) {
+            throw new Error('Duration must be greater than 0');
+        } else if (name.value === '') {
+            throw new Error('Name cannot be empty');
+        } else if (description.value === '') {
+            throw new Error('Description cannot be empty');
+        }
+
+        const startTimeValue =
+            startTime.value === '' ? new Date() : new Date(startTime.value);
+
+        const start_time = new Date(startTimeValue).toISOString();
+        const end_time = new Date(
+            new Date(startTimeValue).getTime() + duration.value * 60000,
+        ).toISOString();
+
+        const payload = {
+            classroom_id: classroomId,
+            name: name.value,
+            description: description.value,
+            start_time,
+            end_time,
+        };
+        console.log('Payload:', payload);
+
+        const { error } = await supabase.from('activities').insert(payload);
+
+        if (error) {
+            throw error;
+        }
+    } catch (error: any) {
+        err.value = 'An error occurred while creating activity.';
+        console.error('Error creating activity:', error.message);
+    } finally {
+        isLoading.value = false;
+
+        if (!err.value) {
+            router.push(`/classroom/${classroomId}`);
+        }
+    }
+};
+
+/*
 const fetchClassroom = async () => {
     const { data, error } = await supabase
         .from('classrooms')
@@ -62,89 +89,95 @@ const fetchClassroom = async () => {
     };
     return classroomData;
 };
-
-const subscribeToPresence = () => {
-    if (!channel.value) {
-        throw new Error('Channel not initialised');
-    }
-
-    channel.value
-        .on('presence', { event: 'join' }, ({ newPresences }) => {
-            newPresences.forEach((presence) => {
-                console.log('User joined:', presence);
-
-                students.value.push(intoSessionUser(presence));
-            });
-        })
-        .on('presence', { event: 'leave' }, ({ leftPresences }) => {
-            leftPresences.forEach((presence) => {
-                console.log('User left:', presence);
-
-                students.value = students.value.filter(
-                    (student) => student.id !== presence.presence_ref,
-                );
-            });
-        })
-        .subscribe(async (status) => {
-            if (status === 'SUBSCRIBED') {
-                if (!channel.value) {
-                    throw new Error('Channel not initialised');
-                }
-                await channel.value.track({
-                    online_at: new Date().toISOString(),
-                });
-                console.log('Connected to presence channel');
-            }
-        });
-};
-
-const asyncInit = async () => {
-    try {
-        isLoading.value = true;
-
-        classroom.value = await fetchClassroom();
-        console.log(`Joining classroom code: ${classroom.value.code}`);
-
-        channel.value = supabase.channel(classroom.value.code);
-        subscribeToPresence();
-    } catch (error: any) {
-        console.error('Error initilising data:', error.message);
-    } finally {
-        isLoading.value = false;
-    }
-};
-
-onMounted(() => {
-    asyncInit();
-    //fetchClassroom();
-});
+*/
 </script>
 
 <template>
     <div class="container mt-4">
         <div class="container-fluid d-flex">
             <div class="mb-2">
-                <h1>Classroom</h1>
-                <h4 v-if="classroom">{{ headerText }}</h4>
-            </div>
-            <div>
-                <button class="btn btn-primary">Create Activity</button>
+                <h1>Create a new activity</h1>
             </div>
         </div>
 
-        <p v-if="isLoading">Loading...</p>
+        <div class="row justify-content-center">
+            <div class="col-md-8">
+                <div class="card">
+                    <div class="card-body">
+                        <form @submit.prevent="submit">
+                            <div class="form-floating mb-3">
+                                <input
+                                    type="text"
+                                    class="form-control"
+                                    id="activityName"
+                                    placeholder="Tuesday Question 01"
+                                    v-model="name"
+                                />
+                                <label for="activityName" class="form-label"
+                                    >Name</label
+                                >
+                            </div>
 
-        <div v-else-if="classroom" class="container-fluid">
-            <h4>Students In Class</h4>
-            <div class="row text-center">
-                <div
-                    v-for="student in students"
-                    :key="student.id"
-                    class="col-4"
-                >
-                    <p>{{ student.fullName }}</p>
+                            <div class="form-floating mb-3">
+                                <textarea
+                                    class="form-control"
+                                    id="activityDescription"
+                                    placeholder="Prove that P=NP"
+                                    v-model="description"
+                                ></textarea>
+                                <label
+                                    for="activityDescription"
+                                    class="form-label"
+                                    >Description</label
+                                >
+                            </div>
+
+                            <div class="form-floating mb-3">
+                                <input
+                                    type="datetime-local"
+                                    class="form-control"
+                                    id="activityStartTime"
+                                    placeholder="start time"
+                                    v-model="startTime"
+                                />
+                                <label
+                                    for="activityStartTime"
+                                    class="form-label"
+                                    >Start Time (leave blank to use time
+                                    now)</label
+                                >
+                            </div>
+
+                            <div class="form-floating mb-3">
+                                <input
+                                    type="number"
+                                    class="form-control"
+                                    id="activityDuration"
+                                    placeholder="duration"
+                                    v-model="duration"
+                                />
+                                <label for="activityDuration" class="form-label"
+                                    >Duration (in minutes)</label
+                                >
+                            </div>
+                            <button
+                                type="submit"
+                                :class="placeholder"
+                                class="btn btn-primary"
+                            >
+                                Create Activity
+                            </button>
+                            <p v-if="err" class="text-danger mt-2">{{ err }}</p>
+                        </form>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
 </template>
+
+<style scoped>
+#activityDescription {
+    height: 16rem;
+}
+</style>

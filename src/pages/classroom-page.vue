@@ -3,7 +3,9 @@ import { ref, computed, onMounted } from 'vue';
 import type { RealtimeChannel } from '@supabase/supabase-js';
 
 import { supabase } from '@/supabase-client';
+import { formatDate } from '../utils/dates';
 import type { ClassroomType } from '@data/classrooms';
+import type { ActivityType } from '@/data/activities';
 import { SessionUserType, intoSessionUser } from '@data/account';
 
 type pageProps = {
@@ -17,6 +19,10 @@ const headerText = computed(() =>
     classroom.value
         ? `${classroom.value.name} with code: ${classroom.value.code}`
         : '',
+);
+
+const createActivityLink = computed(
+    () => `/classroom/${classroomId}/create-activity`,
 );
 
 const channel = ref<RealtimeChannel | null>(null);
@@ -42,6 +48,29 @@ const studentList = [
 ];
 
 const students = ref<SessionUserType[]>(studentList);
+
+const activities = ref<ActivityType[]>([]);
+
+const fetchActivities = async () => {
+    const { data, error } = await supabase
+        .from('activities')
+        .select('id,created_at,name,description,start_time,end_time')
+        .eq('classroom_id', classroomId)
+        .order('created_at', { ascending: false });
+
+    if (error) {
+        throw error;
+    }
+
+    return data.map((activity) => ({
+        id: activity.id,
+        createdAt: Date.parse(activity.created_at),
+        name: activity.name,
+        description: activity.description,
+        startTime: Date.parse(activity.start_time),
+        endTime: Date.parse(activity.end_time),
+    }));
+};
 
 const fetchClassroom = async () => {
     const { data, error } = await supabase
@@ -105,6 +134,8 @@ const asyncInit = async () => {
         classroom.value = await fetchClassroom();
         console.log(`Joining classroom code: ${classroom.value.code}`);
 
+        activities.value = await fetchActivities();
+
         channel.value = supabase.channel(classroom.value.code);
         subscribeToPresence();
     } catch (error: any) {
@@ -116,21 +147,24 @@ const asyncInit = async () => {
 
 onMounted(() => {
     asyncInit();
-    //fetchClassroom();
 });
 </script>
 
 <template>
     <div class="container mt-4">
-        <div class="container-fluid d-flex">
+        <div class="container-fluid d-flex justify-content-between">
             <div class="mb-2">
                 <h1>Classroom</h1>
                 <h4 v-if="classroom">{{ headerText }}</h4>
             </div>
             <div>
-                <button class="btn btn-primary">Create Activity</button>
+                <router-link :to="createActivityLink" class="btn btn-primary"
+                    >Create Activity</router-link
+                >
             </div>
         </div>
+
+        <hr />
 
         <p v-if="isLoading">Loading...</p>
 
@@ -145,6 +179,31 @@ onMounted(() => {
                     <p>{{ student.fullName }}</p>
                 </div>
             </div>
+        </div>
+
+        <hr />
+
+        <div class="container-fluid mb-4">
+            <h4>List Activities</h4>
+
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Start Time</th>
+                        <th>End Time</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr v-for="activity in activities" :key="activity.id">
+                        <td>{{ activity.name }}</td>
+                        <td>
+                            {{ formatDate(activity.startTime) }}
+                        </td>
+                        <td>{{ formatDate(activity.endTime) }}</td>
+                    </tr>
+                </tbody>
+            </table>
         </div>
     </div>
 </template>
