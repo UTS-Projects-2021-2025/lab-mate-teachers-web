@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed, defineProps } from 'vue';
+import { ref, computed } from 'vue';
 import { useRouter } from 'vue-router';
 
 import { supabase } from '@/supabase-client';
@@ -68,28 +68,6 @@ const submit = async () => {
         }
     }
 };
-
-/*
-const fetchClassroom = async () => {
-    const { data, error } = await supabase
-        .from('classrooms')
-        .select('*')
-        .eq('id', classroomId)
-        .single();
-
-    if (error) {
-        throw error;
-    }
-
-    const classroomData: ClassroomType = {
-        id: data?.id,
-        code: data?.code,
-        name: data?.name,
-        updatedAt: Date.parse(data?.created_at),
-    };
-    return classroomData;
-};
-*/
 </script>
 
 <template>
