@@ -6,7 +6,7 @@ import { FeTrash2 } from '@kalimahapps/vue-icons';
 
 import { supabase } from '@/supabase-client';
 import { useAccountStore } from '@data/account';
-import type { classroom } from '@data/classrooms';
+import type { ClassroomType } from '@data/classrooms';
 
 const authStore = useAccountStore();
 const { isAuthenticated } = storeToRefs(authStore);
@@ -15,7 +15,7 @@ const className = ref<string>('');
 const isLoading = ref<boolean>(false);
 const err = ref<string | null>(null);
 
-const classrooms = ref<classroom[]>([]);
+const classrooms = ref<ClassroomType[]>([]);
 
 const dateFormatter = (date: number) => {
     const d = new Date(date);
@@ -76,7 +76,10 @@ const fetchClassrooms = async () => {
 
 const deleteClassroom = async (id: string) => {
     try {
-        const { error } = await supabase.from('classrooms').delete().eq('id', id);
+        const { error } = await supabase
+            .from('classrooms')
+            .delete()
+            .eq('id', id);
 
         if (error) {
             throw error;
@@ -107,12 +110,23 @@ onMounted(() => {
                         <div class="card-body">
                             <form @submit.prevent="createClassroom">
                                 <div class="mb-2">
-                                    <label for="className" class="form-label">Name</label>
-                                    <input type="text" class="form-control" id="className" placeholder="Enter class name."
-                                        v-model="className" />
+                                    <label for="className" class="form-label"
+                                        >Name</label
+                                    >
+                                    <input
+                                        type="text"
+                                        class="form-control"
+                                        id="className"
+                                        placeholder="Enter class name."
+                                        v-model="className"
+                                    />
                                 </div>
 
-                                <button type="submit" class="btn btn-primary" :disabled="isLoading">
+                                <button
+                                    type="submit"
+                                    class="btn btn-primary"
+                                    :disabled="isLoading"
+                                >
                                     Create
                                 </button>
                                 <p v-if="err" class="text-danger mt-2">
@@ -148,13 +162,21 @@ onMounted(() => {
                             {{ dateFormatter(classroom.updatedAt) }}
                         </td>
                         <td>
-                            <router-link :to="`/classroom/${classroom.id}`" class="link">
+                            <router-link
+                                :to="`/classroom/${classroom.id}`"
+                                class="link"
+                            >
                                 {{ `Link to ${classroom.name}` }}
                             </router-link>
                         </td>
                         <td>
                             <button class="btn btn-primary">Edit</button>
-                            <button class="btn btn-danger" @click="deleteClassroom(classroom.id)"><fe-trash-2 /></button>
+                            <button
+                                class="btn btn-danger"
+                                @click="deleteClassroom(classroom.id)"
+                            >
+                                <fe-trash-2 />
+                            </button>
                         </td>
                     </tr>
                 </tbody>

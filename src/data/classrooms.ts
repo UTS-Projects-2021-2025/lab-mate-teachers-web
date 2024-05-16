@@ -1,4 +1,4 @@
-export type classroom = {
+export type ClassroomType = {
     id: string;
     code: string;
     name: string;

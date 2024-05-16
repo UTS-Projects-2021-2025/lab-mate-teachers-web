@@ -5,7 +5,7 @@ import type { Session } from '@supabase/supabase-js';
 
 import { supabase } from '@/supabase-client';
 
-export type account = {
+export type AccountType = {
     id: string;
     updatedAt: number;
     username: string;
@@ -13,9 +13,27 @@ export type account = {
     avatarUrl: string;
 };
 
+export type SessionUserType = {
+    id: string;
+    username: string;
+    fullName: string;
+};
+
+export const intoSessionUser = ({
+    presence_ref,
+    username,
+    fullName,
+}: any): SessionUserType => {
+    return {
+        id: presence_ref,
+        username,
+        fullName,
+    };
+};
+
 export const useAccountStore = defineStore('account', () => {
     const session = ref<Session | null>(null);
-    const account = ref<account | null>(null);
+    const account = ref<AccountType | null>(null);
 
     const username = ref('');
     const fullName = ref('');
